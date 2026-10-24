@@ -1,0 +1,51 @@
+version: '3.8'
+
+networks:
+  jenkins-net:
+    driver: bridge
+
+volumes:
+  jenkins_home:
+    name: jenkins_home_data
+
+services:
+  # =========================================================================
+  # Jenkins Controller (Master)
+  # - Orchestrates build pipelines
+  # - Serves Web UI on port 8080
+  # - Listens for Jenkins Remoting (JNLP / Inbound Agent) connections on 50000
+  # =========================================================================
+  jenkins-controller:
+    image: jenkins/jenkins:lts-jdk21
+    container_name: jenkins-controller
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=true
+    networks:
+      - jenkins-net
+
+  # =========================================================================
+  # Jenkins Agent (Worker Node)
+  # - Executes builds, compiles code, runs JUnit tests
+  # - Communicates with Controller via Jenkins Remoting protocol
+  # - Activated by supplying the Agent Secret from Jenkins UI
+  # =========================================================================
+  jenkins-agent:
+    image: jenkins/inbound-agent:latest-jdk21
+    container_name: jenkins-agent
+    restart: unless-stopped
+    depends_on:
+      - jenkins-controller
+    environment:
+      - JENKINS_URL=http://jenkins-controller:8080
+      - JENKINS_AGENT_NAME=jenkins-agent-node
+      # Paste the secret generated in Jenkins UI (Manage Jenkins > Nodes)
+      - JENKINS_SECRET=${JENKINS_AGENT_SECRET:-}
+      - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+    networks:
+      - jenkins-net

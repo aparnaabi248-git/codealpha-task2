@@ -1,0 +1,16 @@
+# Custom Jenkins Inbound Agent with JDK 21 and build tools
+FROM jenkins/inbound-agent:latest-jdk21
+
+USER root
+
+# Install essential build tools & utilities
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    unzip \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+USER jenkins
+WORKDIR /home/jenkins

@@ -1,0 +1,24 @@
+# Gradle build outputs
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Jenkins data and agent workspace (local runs)
+jenkins_home/
+agent-workdir/
+remoting.jar
+agent.jar
+
+# IDE specific
+.idea/
+*.iml
+.vscode/
+bin/
+
+# OS specific
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
